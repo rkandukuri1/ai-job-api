@@ -270,7 +270,7 @@ async def process_job(
     )
 
     description = job.get(
-        "job_description",
+        "description",
         ""
     )
 
@@ -318,7 +318,7 @@ async def process_job(
             "title": title,
             "company": company,
             "location": location,
-            "Description": description[:200] + " ...",
+            "description": description,
             "apply_link": apply_link
         }
 
@@ -330,11 +330,10 @@ async def process_job(
         )
 
         return {
-
             "title": title,
             "company": company,
             "location": location,
-            "description" : description[:200] + " ...",
+            "description" : description,
             "apply_link": apply_link
         }
 
