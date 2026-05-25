@@ -34,29 +34,6 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 18,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(
-              color: Color(0xFF2563EB),
-              width: 2,
-            ),
-          ),
-        ),
       ),
       home: const JobSearchPage(),
     );
@@ -91,27 +68,15 @@ class _JobSearchPageState extends State<JobSearchPage> {
   };
 
   Future<void> openApplyLink(String url) async {
-    if (url.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("No apply link available"),
-        ),
-      );
-      return;
-    }
+    if (url.isEmpty) return;
 
     final Uri uri = Uri.parse(url);
 
     try {
-      await launchUrl(
-        uri,
-        mode: LaunchMode.externalApplication,
-      );
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Could not open link"),
-        ),
+        const SnackBar(content: Text("Could not open link")),
       );
     }
   }
@@ -119,23 +84,16 @@ class _JobSearchPageState extends State<JobSearchPage> {
   Future<void> searchJobs({bool loadMore = false}) async {
     if (!loadMore) {
       currentPage = 1;
-
-      setState(() {
-        jobs = [];
-        hasMore = true;
-      });
+      jobs = [];
+      hasMore = true;
     }
 
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
 
     try {
       final response = await http.post(
         Uri.parse("${AppConfig.apiBaseUrl}/jobs"),
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "skills": skillsController.text,
           "country": selectedCountry,
@@ -159,29 +117,17 @@ class _JobSearchPageState extends State<JobSearchPage> {
         hasMore = newJobs.length == 10;
       });
     } catch (e) {
-      debugPrint("ERROR: $e");
-
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error: $e"),
-        ),
+        SnackBar(content: Text("Error: $e")),
       );
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      setState(() => isLoading = false);
     }
   }
 
   Color scoreColor(int score) {
-    if (score >= 80) {
-      return Colors.green;
-    }
-
-    if (score >= 60) {
-      return Colors.orange;
-    }
-
+    if (score >= 80) return Colors.green;
+    if (score >= 60) return Colors.orange;
     return Colors.red;
   }
 
@@ -191,11 +137,8 @@ class _JobSearchPageState extends State<JobSearchPage> {
       appBar: AppBar(
         centerTitle: true,
         title: const Text(
-          "AI Job Search",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
+          "AI Job Search                                                           - by Ramesh Kandukuri",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
       ),
       body: SafeArea(
@@ -203,51 +146,62 @@ class _JobSearchPageState extends State<JobSearchPage> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
+
+              // ✅ HEADER (FIXED)
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF2563EB),
-                      Color(0xFF7C3AED),
-                    ],
+                    colors: [Color(0xFF2563EB), Color(0xFF7C3AED)],
                   ),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Column(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+
+                    // LEFT TEXT
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          "VigilantCorp Inc \n\nAI Job Searcher",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          "Find AI-ranked jobs instantly",
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    // RIGHT LOGO
                     ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: Image.asset(
                         'assets/logo.png',
-                        height: 50,
-                        width: 50,
+                        height: 80,
+                        width: 80,
                         fit: BoxFit.cover,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    const Text(
-                      "AI Job Searcher",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      "Find AI-ranked jobs instantly",
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
                       ),
                     ),
                   ],
                 ),
               ),
+
               const SizedBox(height: 12),
+
+              // SKILLS INPUT
               TextField(
                 controller: skillsController,
                 decoration: const InputDecoration(
@@ -256,7 +210,10 @@ class _JobSearchPageState extends State<JobSearchPage> {
                   border: OutlineInputBorder(),
                 ),
               ),
+
               const SizedBox(height: 8),
+
+              // COUNTRY DROPDOWN
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
@@ -268,70 +225,42 @@ class _JobSearchPageState extends State<JobSearchPage> {
                   isExpanded: true,
                   underline: const SizedBox(),
                   items: countries.entries.map((entry) {
-                    return DropdownMenuItem<String>(
+                    return DropdownMenuItem(
                       value: entry.key,
                       child: Text(entry.value),
                     );
                   }).toList(),
                   onChanged: (value) {
                     if (value != null) {
-                      setState(() {
-                        selectedCountry = value;
-                      });
+                      setState(() => selectedCountry = value);
                     }
                   },
                 ),
               ),
+
               const SizedBox(height: 16),
+
+              // SEARCH BUTTON
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: isLoading
-                      ? null
-                      : () async {
-                          await searchJobs();
-                        },
+                  onPressed: isLoading ? null : () => searchJobs(),
                   child: const Text("Find Jobs"),
                 ),
               ),
+
               const SizedBox(height: 8),
+
               if (isLoading)
-                const Padding(
-                  padding: EdgeInsets.all(10),
-                  child: CircularProgressIndicator(),
-                ),
-              const SizedBox(height: 5),
+                const CircularProgressIndicator(),
+
+              const SizedBox(height: 10),
+
+              // JOB LIST
               Expanded(
                 child: jobs.isEmpty
-                    ? Center(
-                        child: SingleChildScrollView(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(
-                                Icons.search_off,
-                                size: 50,
-                                color: Colors.grey,
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                "No jobs found",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                "Try different skills",
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                    ? const Center(
+                        child: Text("No jobs found"),
                       )
                     : ListView.builder(
                         itemCount: jobs.length,
@@ -339,8 +268,6 @@ class _JobSearchPageState extends State<JobSearchPage> {
                           final job = jobs[index];
 
                           return Card(
-                            elevation: 0,
-                            margin: const EdgeInsets.only(bottom: 12),
                             child: Padding(
                               padding: const EdgeInsets.all(16),
                               child: Column(
@@ -349,51 +276,33 @@ class _JobSearchPageState extends State<JobSearchPage> {
                                   Text(
                                     job["title"] ?? "",
                                     style: const TextStyle(
-                                      fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    job["company"] ?? "",
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: 6),
+                                  Text(job["company"] ?? ""),
                                   Text(job["location"] ?? ""),
-                                  const SizedBox(height: 12),
+
+                                  const SizedBox(height: 10),
+
                                   Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 6,
-                                    ),
+                                    padding: const EdgeInsets.all(6),
                                     decoration: BoxDecoration(
                                       color: scoreColor(job["score"] ?? 0),
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Text(
-                                      "Match Score: ${job["score"]}",
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                      "Match: ${job["score"]}",
+                                      style: const TextStyle(color: Colors.white),
                                     ),
                                   ),
-                                  const SizedBox(height: 12),
-                                  Text(job["why_match"] ?? ""),
-                                  const SizedBox(height: 16),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: ElevatedButton.icon(
-                                      onPressed: () {
-                                        openApplyLink(
-                                          job["apply_link"] ?? "",
-                                        );
-                                      },
-                                      icon: const Icon(Icons.open_in_new),
-                                      label: const Text("Apply Now"),
-                                    ),
+
+                                  const SizedBox(height: 10),
+
+                                  ElevatedButton(
+                                    onPressed: () =>
+                                        openApplyLink(job["apply_link"] ?? ""),
+                                    child: const Text("  Apply Now  "),
                                   ),
                                 ],
                               ),
@@ -402,19 +311,14 @@ class _JobSearchPageState extends State<JobSearchPage> {
                         },
                       ),
               ),
-              if (hasMore && jobs.isNotEmpty)
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      setState(() {
-                        currentPage++;
-                      });
 
-                      await searchJobs(loadMore: true);
-                    },
-                    child: const Text("Load More Jobs"),
-                  ),
+              if (hasMore && jobs.isNotEmpty)
+                ElevatedButton(
+                  onPressed: () {
+                    currentPage++;
+                    searchJobs(loadMore: true);
+                  },
+                  child: const Text("Load More"),
                 ),
             ],
           ),
