@@ -13,26 +13,19 @@ from pydantic import BaseModel
 # -----------------------------------
 load_dotenv()
 
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY_FREE"))
+
 # -----------------------------------
 # CONFIG
 # -----------------------------------
 API_URL = "https://jsearch.p.rapidapi.com/search"
 
 HEADERS = {
-
-    "X-RapidAPI-Key": os.getenv(
-        "X_RAPIDAPI_KEY"
-    ),
-
+    # "X-RapidAPI-Key": os.getenv("X_RAPIDAPI_KEY"),
+    "X-RapidAPI-Key":"123fc79263mshbb6aa5a9b340d2ep14cba6jsn89bcce76b5c3",
     "X-RapidAPI-Host":
         "jsearch.p.rapidapi.com"
 }
-
-client = OpenAI(
-    api_key=os.getenv(
-        "OPENAI_API_KEY"
-    )
-)
 
 # -----------------------------------
 # FASTAPI INIT
@@ -43,15 +36,10 @@ app = FastAPI()
 # CORS
 # -----------------------------------
 app.add_middleware(
-
     CORSMiddleware,
-
     allow_origins=["*"],
-
     allow_credentials=True,
-
     allow_methods=["*"],
-
     allow_headers=["*"],
 )
 
@@ -59,13 +47,9 @@ app.add_middleware(
 # REQUEST MODEL
 # -----------------------------------
 class JobRequest(BaseModel):
-
     skills: str
-
     country: str = "us"
-
     page: int = 1
-
     limit: int = 10
 
 
@@ -77,16 +61,12 @@ def build_search_query(
 ):
 
     skills = [
-
         s.strip()
-
         for s in user_skills.split(",")
-
         if s.strip()
     ]
 
     if skills:
-
         return (
             " ".join(skills)
             + " developer"
@@ -99,11 +79,8 @@ def build_search_query(
 # FETCH JOBS
 # -----------------------------------
 async def fetch_jobs(
-
     user_skills,
-
     country,
-
     page
 ):
 
@@ -112,13 +89,9 @@ async def fetch_jobs(
     )
 
     params = {
-
         "query": query,
-
         "page": str(page),
-
         "num_pages": "1",
-
         "country": country
     }
 
@@ -129,11 +102,8 @@ async def fetch_jobs(
         ) as http_client:
 
             response = await http_client.get(
-
                 API_URL,
-
                 headers=HEADERS,
-
                 params=params
             )
 
@@ -193,11 +163,8 @@ async def fetch_jobs(
 # AI SCORE
 # -----------------------------------
 async def semantic_score(
-
     user_skills,
-
     title,
-
     description
 ):
 
@@ -219,11 +186,8 @@ Return ONLY the number.
 """
 
         response = await asyncio.to_thread(
-
             client.responses.create,
-
             model="gpt-4.1-mini",
-
             input=prompt
         )
 
@@ -253,16 +217,12 @@ Return ONLY the number.
 # AI EXPLANATION
 # -----------------------------------
 async def explain_match(
-
     user_skills,
-
     title,
-
     description
 ):
 
     try:
-
         prompt = f"""
 User skills:
 {user_skills}
@@ -277,11 +237,8 @@ Explain in ONE short sentence why this job matches.
 """
 
         response = await asyncio.to_thread(
-
             client.responses.create,
-
             model="gpt-4.1-mini",
-
             input=prompt
         )
 
@@ -303,9 +260,7 @@ Explain in ONE short sentence why this job matches.
 # PROCESS SINGLE JOB
 # -----------------------------------
 async def process_job(
-
     job,
-
     user_skills
 ):
 
@@ -332,7 +287,6 @@ async def process_job(
     apply_link = (
 
         job.get("job_apply_link")
-
         or job.get("job_google_link")
 
         or ""
@@ -341,28 +295,20 @@ async def process_job(
     try:
 
         score_task = semantic_score(
-
             user_skills,
-
             title,
-
             description
         )
 
         explain_task = explain_match(
-
             user_skills,
-
             title,
-
             description
         )
 
         score, explanation = (
             await asyncio.gather(
-
                 score_task,
-
                 explain_task
             )
         )
@@ -370,15 +316,9 @@ async def process_job(
         return {
 
             "title": title,
-
             "company": company,
-
             "location": location,
-
-            "score": score,
-
-            "why_match": explanation,
-
+            "Description": description[:200] + " ...",
             "apply_link": apply_link
         }
 
@@ -392,16 +332,9 @@ async def process_job(
         return {
 
             "title": title,
-
             "company": company,
-
             "location": location,
-
-            "score": 0,
-
-            "why_match":
-                "Unable to process.",
-
+            "description" : description[:200] + " ...",
             "apply_link": apply_link
         }
 
@@ -410,22 +343,15 @@ async def process_job(
 # FIND JOBS
 # -----------------------------------
 async def find_jobs(
-
     user_skills,
-
     country,
-
     page,
-
     limit
 ):
 
     jobs = await fetch_jobs(
-
         user_skills,
-
         country,
-
         page
     )
 
@@ -453,16 +379,6 @@ async def find_jobs(
         *tasks
     )
 
-    # --------------------------------
-    # SORT BY AI SCORE
-    # --------------------------------
-    results.sort(
-
-        key=lambda x: x["score"],
-
-        reverse=True
-    )
-
     return results
 
 
@@ -475,7 +391,6 @@ async def root():
     return {
 
         "status": "success",
-
         "message":
             "AI Job Search API Running"
     }
@@ -503,31 +418,21 @@ async def get_jobs(
     try:
 
         results = await find_jobs(
-
             req.skills,
-
             req.country,
-
             req.page,
-
             req.limit
         )
 
         return {
 
             "status": "success",
-
             "skills": req.skills,
-
             "country": req.country,
-
             "page": req.page,
-
             "limit": req.limit,
-
             "total_jobs":
                 len(results),
-
             "jobs": results
         }
 
@@ -539,8 +444,6 @@ async def get_jobs(
         )
 
         raise HTTPException(
-
             status_code=500,
-
             detail=str(e)
         )
