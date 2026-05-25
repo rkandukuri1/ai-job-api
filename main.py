@@ -318,7 +318,7 @@ async def process_job(
             "title": title,
             "company": company,
             "location": location,
-            "description": description,
+            "description": Description,
             "apply_link": apply_link
         }
 
