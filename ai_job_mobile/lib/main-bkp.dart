@@ -150,7 +150,7 @@ class _JobSearchPageState extends State<JobSearchPage> {
               // ✅ HEADER (FIXED)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [Color(0xFF2563EB), Color(0xFF7C3AED)],
@@ -167,29 +167,19 @@ class _JobSearchPageState extends State<JobSearchPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: const [
                         Text(
-                          "VigilantCorp Inc.",
+                          "VigilantCorp Inc \n\nAI Job Searcher",
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 14,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-
-                        Text(
-                          "\nAI Job Searcher",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-
-                        // SizedBox(height: 6),
+                        SizedBox(height: 6),
                         Text(
                           "Find AI-ranked jobs instantly",
                           style: TextStyle(
                             color: Colors.white70,
-                            fontSize: 12,
+                            fontSize: 14,
                           ),
                         ),
                       ],
@@ -200,8 +190,8 @@ class _JobSearchPageState extends State<JobSearchPage> {
                       borderRadius: BorderRadius.circular(12),
                       child: Image.asset(
                         'assets/logo.png',
-                        height: 75,
-                        width: 75,
+                        height: 80,
+                        width: 80,
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -220,6 +210,7 @@ class _JobSearchPageState extends State<JobSearchPage> {
                   border: OutlineInputBorder(),
                 ),
               ),
+
               const SizedBox(height: 8),
 
               // COUNTRY DROPDOWN
@@ -294,7 +285,17 @@ class _JobSearchPageState extends State<JobSearchPage> {
 
                                   const SizedBox(height: 10),
 
-                                  Text(job["description"] ?? ""),                       
+                                  Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: scoreColor(job["score"] ?? 0),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      "Match: ${job["score"]}",
+                                      style: const TextStyle(color: Colors.white),
+                                    ),
+                                  ),
 
                                   const SizedBox(height: 10),
 
