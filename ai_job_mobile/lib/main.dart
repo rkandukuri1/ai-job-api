@@ -102,7 +102,14 @@ class _JobSearchPageState extends State<JobSearchPage> {
         }),
       );
 
+      print("================================");
+      print(response.body);
+      print("================================");
+
       final data = jsonDecode(response.body);
+
+      print(data);
+      print("================================");
 
       final List<Map<String, dynamic>> newJobs =
           List<Map<String, dynamic>>.from(data["jobs"] ?? []);
@@ -210,7 +217,6 @@ class _JobSearchPageState extends State<JobSearchPage> {
                   border: OutlineInputBorder(),
                 ),
               ),
-
               const SizedBox(height: 8),
 
               // COUNTRY DROPDOWN
@@ -285,17 +291,7 @@ class _JobSearchPageState extends State<JobSearchPage> {
 
                                   const SizedBox(height: 10),
 
-                                  Container(
-                                    padding: const EdgeInsets.all(6),
-                                    decoration: BoxDecoration(
-                                      color: scoreColor(job["score"] ?? 0),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Text(
-                                      "Match: ${job["score"]}",
-                                      style: const TextStyle(color: Colors.white),
-                                    ),
-                                  ),
+                                  Text(job["Description"] ?? ""),
 
                                   const SizedBox(height: 10),
 
