@@ -291,7 +291,8 @@ class _JobSearchPageState extends State<JobSearchPage> {
                                   const SizedBox(height: 6),
                                   Text(job["company"] ?? ""),
                                   Text(job["location"] ?? ""),
-
+                                  Text(job["posting_date"] ?? ""),
+                                
                                   const SizedBox(height: 10),
 
                                   Text(job["description"] ?? ""),                       

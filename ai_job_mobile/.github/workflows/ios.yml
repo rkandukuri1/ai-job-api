@@ -2,25 +2,66 @@ name: iOS Build
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build-ios:
     runs-on: macos-latest
 
     steps:
+      # ---------------- CHECKOUT ----------------
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Flutter
+      # ---------------- FLUTTER ----------------
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.44.0'
           channel: stable
 
-      - name: Install Flutter dependencies
+      - name: Install dependencies
         run: flutter pub get
 
-      - name: Build iOS (No Signing)
+      # ---------------- CERTIFICATES ----------------
+      - name: Decode Certificate
+        run: |
+          echo "${{ secrets.BUILD_CERTIFICATE_BASE64 }}" | base64 --decode > certificate.p12
+
+      - name: Decode Provisioning Profile
+        run: |
+          echo "${{ secrets.PROVISION_PROFILE_BASE64 }}" | base64 --decode > profile.mobileprovision
+
+      # ---------------- KEYCHAIN SETUP ----------------
+      - name: Setup Keychain
+        run: |
+          KEYCHAIN=build.keychain-db
+
+          security create-keychain -p "" $KEYCHAIN
+          security set-keychain-settings -lut 21600 $KEYCHAIN
+          security unlock-keychain -p "" $KEYCHAIN
+          security default-keychain -s $KEYCHAIN
+          security list-keychains -d user -s $KEYCHAIN
+
+          security import certificate.p12 -k $KEYCHAIN -P "${{ secrets.P12_PASSWORD }}" -A
+
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" $KEYCHAIN
+
+      # ---------------- PROVISIONING PROFILE ----------------
+      - name: Install Provisioning Profile
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+
+      # ---------------- POD INSTALL ----------------
+      - name: Install CocoaPods
+        run: |
+          sudo gem install cocoapods
+          cd ios
+          pod install
+          cd ..
+
+      # ---------------- IOS BUILD ----------------
+      - name: Build iOS (no signing)
         run: flutter build ios --release --no-codesign
