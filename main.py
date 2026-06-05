@@ -264,16 +264,10 @@ async def process_job(
     user_skills
 ):
     
-    print("========")
-    print(job)
-    print("========")
-
     title = job.get( "job_title", "" )
-
+    posting_date = job.get("job_posted_at", "")
     description = job.get( "job_description", "" )
-
     company = job.get( "employer_name", "")
-
     location = job.get( "job_city", "" )
 
     apply_link = (
@@ -305,11 +299,11 @@ async def process_job(
             )
         )
 
-        return {
-
+        return {                                                
             "title": title,
             "company": company,
             "location": location,
+            "Posting Date": posting_date,
             "description": description[:200] + " ...",
             "apply_link": apply_link
         }
@@ -325,6 +319,7 @@ async def process_job(
             "title": title,
             "company": company,
             "location": location,
+            "Posting Date": posting_date,
             "description" : description,
             "apply_link": apply_link
         }
